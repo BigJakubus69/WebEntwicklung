@@ -4,10 +4,11 @@ import { QRCodeGenerator } from './QRCodeGenerator.js';
 export class BetreiberView {
     constructor(apiClient) {
         this.apiClient = apiClient;
-        this.kinosaeleList = new PaginatedList('kinosaele-list', (saal) => this.createKinosaalCard(saal));
-        this.vorstellungenList = new PaginatedList('vorstellungen-list', (vorstellung) => this.createVorstellungCard(vorstellung));
-        this.reservierungenList = new PaginatedList('reservierungen-list', (reservierung) => this.createReservierungCard(reservierung));
-        this.qrGenerator = new QRCodeGenerator('qr-container');
+        // Instanzen werden erst nach dem Rendern erstellt
+        this.kinosaeleList = null;
+        this.vorstellungenList = null;
+        this.reservierungenList = null;
+        this.qrGenerator = null;
     }
 
     render() {
@@ -73,6 +74,12 @@ export class BetreiberView {
             </div>
             <div id="qr-container"></div>
         `;
+
+        // Jetzt existieren die Container im DOM - hier werden die Instanzen erstellt
+        this.kinosaeleList = new PaginatedList('kinosaele-list', (saal) => this.createKinosaalCard(saal));
+        this.vorstellungenList = new PaginatedList('vorstellungen-list', (vorstellung) => this.createVorstellungCard(vorstellung));
+        this.reservierungenList = new PaginatedList('reservierungen-list', (reservierung) => this.createReservierungCard(reservierung));
+        this.qrGenerator = new QRCodeGenerator('qr-container');
 
         this.initEventListeners();
         this.loadData();

@@ -227,14 +227,18 @@ var QRCodeGenerator = class {
 var BetreiberView = class {
   constructor(apiClient) {
     this.apiClient = apiClient;
-    this.kinosaeleList = new PaginatedList("kinosaele-list", (saal) => this.createKinosaalCard(saal));
-    this.vorstellungenList = new PaginatedList("vorstellungen-list", (vorstellung) => this.createVorstellungCard(vorstellung));
-    this.reservierungenList = new PaginatedList("reservierungen-list", (reservierung) => this.createReservierungCard(reservierung));
-    this.qrGenerator = new QRCodeGenerator("qr-container");
+    this.kinosaeleList = null;
+    this.vorstellungenList = null;
+    this.reservierungenList = null;
+    this.qrGenerator = null;
   }
   render() {
     const app = document.getElementById("app");
     app.innerHTML = '\n            <div class="container">\n                <h2>Betreiber-Dashboard</h2>\n                \n                <div class="section">\n                    <h3>Neuen Kinosaal anlegen</h3>\n                    <form id="kinosaal-form">\n                        <div class="form-group">\n                            <label for="saal-name">Name:</label>\n                            <input type="text" id="saal-name" required>\n                        </div>\n                        <div class="form-group">\n                            <label for="reihen-anzahl">Anzahl Sitzreihen:</label>\n                            <input type="number" id="reihen-anzahl" min="1" required>\n                        </div>\n                        <div class="form-group">\n                            <label for="sitze-pro-reihe">Anzahl Sitze pro Reihe:</label>\n                            <input type="number" id="sitze-pro-reihe" min="1" required>\n                        </div>\n                        <button type="submit">Kinosaal anlegen</button>\n                    </form>\n                </div>\n\n                <div class="section">\n                    <h3>Neue Vorstellung anlegen</h3>\n                    <form id="vorstellung-form">\n                        <div class="form-group">\n                            <label for="film-name">Filmname:</label>\n                            <input type="text" id="film-name" required>\n                        </div>\n                        <div class="form-group">\n                            <label for="vorstellung-datum">Datum und Uhrzeit:</label>\n                            <input type="datetime-local" id="vorstellung-datum" required>\n                        </div>\n                        <div class="form-group">\n                            <label for="kinosaal-select">Kinosaal:</label>\n                            <select id="kinosaal-select" required>\n                                <option value="">Bitte w\xE4hlen...</option>\n                            </select>\n                        </div>\n                        <button type="submit">Vorstellung anlegen</button>\n                    </form>\n                </div>\n\n                <div class="section">\n                    <h3>Kinos\xE4le</h3>\n                    <div id="kinosaele-list" class="grid-list"></div>\n                </div>\n\n                <div class="section">\n                    <h3>Vorstellungen</h3>\n                    <div id="vorstellungen-list" class="grid-list"></div>\n                </div>\n\n                <div class="section">\n                    <h3>Alle Reservierungen</h3>\n                    <div id="reservierungen-list" class="grid-list"></div>\n                </div>\n            </div>\n            <div id="qr-container"></div>\n        ';
+    this.kinosaeleList = new PaginatedList("kinosaele-list", (saal) => this.createKinosaalCard(saal));
+    this.vorstellungenList = new PaginatedList("vorstellungen-list", (vorstellung) => this.createVorstellungCard(vorstellung));
+    this.reservierungenList = new PaginatedList("reservierungen-list", (reservierung) => this.createReservierungCard(reservierung));
+    this.qrGenerator = new QRCodeGenerator("qr-container");
     this.initEventListeners();
     this.loadData();
   }
@@ -327,14 +331,16 @@ var BetreiberView = class {
 var KundeView = class {
   constructor(apiClient) {
     this.apiClient = apiClient;
-    this.vorstellungenList = new PaginatedList("vorstellungen-list", (vorstellung) => this.createVorstellungCard(vorstellung));
-    this.qrGenerator = new QRCodeGenerator("qr-container");
+    this.vorstellungenList = null;
+    this.qrGenerator = null;
     this.currentVorstellung = null;
     this.ausgewaehlteSitze = /* @__PURE__ */ new Set();
   }
   render() {
     const app = document.getElementById("app");
     app.innerHTML = '\n            <div class="container">\n                <h2>Kundenbereich</h2>\n                \n                <div class="section">\n                    <h3>Verf\xFCgbare Vorstellungen</h3>\n                    <div id="vorstellungen-list" class="grid-list"></div>\n                </div>\n\n                <div id="sitzplatz-auswahl" style="display: none;">\n                    <h3>Sitzplatzauswahl f\xFCr <span id="aktueller-film"></span></h3>\n                    <div id="sitzplan"></div>\n                    \n                    <div class="form-group">\n                        <label for="kunden-name">Ihr Name:</label>\n                        <input type="text" id="kunden-name" required>\n                    </div>\n                    \n                    <button id="reservieren-btn">Reservieren</button>\n                    <button id="zurueck-btn">Zur\xFCck zur Auswahl</button>\n                </div>\n            </div>\n            <div id="qr-container"></div>\n        ';
+    this.vorstellungenList = new PaginatedList("vorstellungen-list", (vorstellung) => this.createVorstellungCard(vorstellung));
+    this.qrGenerator = new QRCodeGenerator("qr-container");
     this.loadVorstellungen();
     this.initEventListeners();
   }

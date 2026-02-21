@@ -4,8 +4,9 @@ import { QRCodeGenerator } from './QRCodeGenerator.js';
 export class KundeView {
     constructor(apiClient) {
         this.apiClient = apiClient;
-        this.vorstellungenList = new PaginatedList('vorstellungen-list', (vorstellung) => this.createVorstellungCard(vorstellung));
-        this.qrGenerator = new QRCodeGenerator('qr-container');
+        // Instanzen werden erst nach dem Rendern erstellt
+        this.vorstellungenList = null;
+        this.qrGenerator = null;
         this.currentVorstellung = null;
         this.ausgewaehlteSitze = new Set();
     }
@@ -36,6 +37,10 @@ export class KundeView {
             </div>
             <div id="qr-container"></div>
         `;
+
+        // Jetzt existieren die Container im DOM - hier werden die Instanzen erstellt
+        this.vorstellungenList = new PaginatedList('vorstellungen-list', (vorstellung) => this.createVorstellungCard(vorstellung));
+        this.qrGenerator = new QRCodeGenerator('qr-container');
 
         this.loadVorstellungen();
         this.initEventListeners();
