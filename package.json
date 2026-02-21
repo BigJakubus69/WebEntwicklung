@@ -1,0 +1,24 @@
+{
+  "name": "kinoverwaltung",
+  "version": "1.0.0",
+  "description": "Kinoverwaltungssystem mit Node.js, Express und MongoDB",
+  "main": "server/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/server.mjs",
+    "dev": "nodemon server/server.js",
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
+    "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "clean": "^4.0.2",
+    "esbuild": "^0.27.3",
+    "nodemon": "^3.0.1"
+  }
+}
