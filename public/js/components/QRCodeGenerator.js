@@ -96,12 +96,12 @@ export class QRCodeGenerator {
 
     // Formatierte Sitzplatzliste für den Druck
     const sitzplatzListe = reservierung.sitzplaetze
-        .map(s => `Reihe ${s.reihe}, Platz ${s.sitz}`)
-        .join('<br>');
+      .map(s => `Reihe ${s.reihe}, Platz ${s.sitz}`)
+      .join('<br>');
 
     printWindow.document.write(`
       <!DOCTYPE html>
-      <html>
+      <html lang="german">
         <head>
           <title>QR-Code Reservierung</title>
           <style>

@@ -57,7 +57,7 @@ router.post('/', async (req, res) => {
 
     const kinosaal = vorstellung.kinosaal;
     const ungueltigePlaetze = req.body.sitzplaetze.filter(
-        sitz => sitz.reihe > kinosaal.anzahlReihen || sitz.sitz > kinosaal.anzahlSitzeProReihe
+      sitz => sitz.reihe > kinosaal.anzahlReihen || sitz.sitz > kinosaal.anzahlSitzeProReihe
     );
 
     if (ungueltigePlaetze.length > 0) {

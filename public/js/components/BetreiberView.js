@@ -1,8 +1,10 @@
+/* global alert, confirm */
+
 import { PaginatedList } from './Pagination.js';
 import { QRCodeGenerator } from './QRCodeGenerator.js';
 
 export class BetreiberView {
-  constructor(apiClient) {
+  constructor (apiClient) {
     this.apiClient = apiClient;
     this.kinosaeleList = null;
     this.vorstellungenList = null;
@@ -10,7 +12,7 @@ export class BetreiberView {
     this.qrGenerator = null;
   }
 
-  render() {
+  render () {
     const app = document.getElementById('app');
     app.innerHTML = `
             <div class="container">
@@ -83,7 +85,7 @@ export class BetreiberView {
     this.loadData();
   }
 
-  initEventListeners() {
+  initEventListeners () {
     document.getElementById('kinosaal-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       await this.createKinosaal();
@@ -95,7 +97,7 @@ export class BetreiberView {
     });
   }
 
-  async loadData() {
+  async loadData () {
     try {
       const [kinosaele, vorstellungen, reservierungen] = await Promise.all([
         this.apiClient.getKinosaele(),
@@ -117,7 +119,7 @@ export class BetreiberView {
     }
   }
 
-  async createKinosaal() {
+  async createKinosaal () {
     try {
       const name = document.getElementById('saal-name').value;
       const anzahlReihen = parseInt(document.getElementById('reihen-anzahl').value);
@@ -137,7 +139,7 @@ export class BetreiberView {
     }
   }
 
-  async createVorstellung() {
+  async createVorstellung () {
     try {
       const filmName = document.getElementById('film-name').value;
       const datumUhrzeit = document.getElementById('vorstellung-datum').value;
@@ -158,7 +160,7 @@ export class BetreiberView {
   }
 
   // Löschfunktionen
-  async deleteKinosaal(id, name) {
+  async deleteKinosaal (id, name) {
     if (confirm(`Sind Sie sicher, dass Sie den Kinosaal "${name}" löschen möchten?`)) {
       try {
         await this.apiClient.deleteKinosaal(id);
@@ -170,7 +172,7 @@ export class BetreiberView {
     }
   }
 
-  async deleteVorstellung(id, filmName) {
+  async deleteVorstellung (id, filmName) {
     if (confirm(`Sind Sie sicher, dass Sie die Vorstellung "${filmName}" löschen möchten?`)) {
       try {
         await this.apiClient.deleteVorstellung(id);
@@ -182,7 +184,7 @@ export class BetreiberView {
     }
   }
 
-  async deleteReservierung(id, kundenName) {
+  async deleteReservierung (id, kundenName) {
     if (confirm(`Sind Sie sicher, dass Sie die Reservierung von "${kundenName}" löschen möchten?`)) {
       try {
         await this.apiClient.deleteReservierung(id);
@@ -194,7 +196,7 @@ export class BetreiberView {
     }
   }
 
-  createKinosaalCard(saal) {
+  createKinosaalCard (saal) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -214,7 +216,7 @@ export class BetreiberView {
     return card;
   }
 
-  createVorstellungCard(vorstellung) {
+  createVorstellungCard (vorstellung) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -233,7 +235,7 @@ export class BetreiberView {
     return card;
   }
 
-  createReservierungCard(reservierung) {
+  createReservierungCard (reservierung) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
