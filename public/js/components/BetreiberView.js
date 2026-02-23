@@ -1,19 +1,16 @@
-/* global alert */
-
 import { PaginatedList } from './Pagination.js';
 import { QRCodeGenerator } from './QRCodeGenerator.js';
 
 export class BetreiberView {
-  constructor (apiClient) {
+  constructor(apiClient) {
     this.apiClient = apiClient;
-    // Instanzen werden erst nach dem Rendern erstellt
     this.kinosaeleList = null;
     this.vorstellungenList = null;
     this.reservierungenList = null;
     this.qrGenerator = null;
   }
 
-  render () {
+  render() {
     const app = document.getElementById('app');
     app.innerHTML = `
             <div class="container">
@@ -77,7 +74,6 @@ export class BetreiberView {
             <div id="qr-container"></div>
         `;
 
-    // Jetzt existieren die Container im DOM - hier werden die Instanzen erstellt
     this.kinosaeleList = new PaginatedList('kinosaele-list', (saal) => this.createKinosaalCard(saal));
     this.vorstellungenList = new PaginatedList('vorstellungen-list', (vorstellung) => this.createVorstellungCard(vorstellung));
     this.reservierungenList = new PaginatedList('reservierungen-list', (reservierung) => this.createReservierungCard(reservierung));
@@ -87,7 +83,7 @@ export class BetreiberView {
     this.loadData();
   }
 
-  initEventListeners () {
+  initEventListeners() {
     document.getElementById('kinosaal-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       await this.createKinosaal();
@@ -99,7 +95,7 @@ export class BetreiberView {
     });
   }
 
-  async loadData () {
+  async loadData() {
     try {
       const [kinosaele, vorstellungen, reservierungen] = await Promise.all([
         this.apiClient.getKinosaele(),
@@ -111,18 +107,17 @@ export class BetreiberView {
       this.vorstellungenList.setItems(vorstellungen);
       this.reservierungenList.setItems(reservierungen);
 
-      // Kinosaal-SELECT für Vorstellungsformular füllen
       const select = document.getElementById('kinosaal-select');
       select.innerHTML = '<option value="">Bitte wählen...</option>' +
-                kinosaele.map(saal =>
-                    `<option value="${saal._id}">${saal.name}</option>`
-                ).join('');
+          kinosaele.map(saal =>
+              `<option value="${saal._id}">${saal.name}</option>`
+          ).join('');
     } catch (error) {
       alert('Fehler beim Laden der Daten: ' + error.message);
     }
   }
 
-  async createKinosaal () {
+  async createKinosaal() {
     try {
       const name = document.getElementById('saal-name').value;
       const anzahlReihen = parseInt(document.getElementById('reihen-anzahl').value);
@@ -142,7 +137,7 @@ export class BetreiberView {
     }
   }
 
-  async createVorstellung () {
+  async createVorstellung() {
     try {
       const filmName = document.getElementById('film-name').value;
       const datumUhrzeit = document.getElementById('vorstellung-datum').value;
@@ -162,7 +157,44 @@ export class BetreiberView {
     }
   }
 
-  createKinosaalCard (saal) {
+  // Löschfunktionen
+  async deleteKinosaal(id, name) {
+    if (confirm(`Sind Sie sicher, dass Sie den Kinosaal "${name}" löschen möchten?`)) {
+      try {
+        await this.apiClient.deleteKinosaal(id);
+        alert('Kinosaal erfolgreich gelöscht!');
+        this.loadData();
+      } catch (error) {
+        alert('Fehler beim Löschen des Kinosaals: ' + error.message);
+      }
+    }
+  }
+
+  async deleteVorstellung(id, filmName) {
+    if (confirm(`Sind Sie sicher, dass Sie die Vorstellung "${filmName}" löschen möchten?`)) {
+      try {
+        await this.apiClient.deleteVorstellung(id);
+        alert('Vorstellung erfolgreich gelöscht!');
+        this.loadData();
+      } catch (error) {
+        alert('Fehler beim Löschen der Vorstellung: ' + error.message);
+      }
+    }
+  }
+
+  async deleteReservierung(id, kundenName) {
+    if (confirm(`Sind Sie sicher, dass Sie die Reservierung von "${kundenName}" löschen möchten?`)) {
+      try {
+        await this.apiClient.deleteReservierung(id);
+        alert('Reservierung erfolgreich gelöscht!');
+        this.loadData();
+      } catch (error) {
+        alert('Fehler beim Löschen der Reservierung: ' + error.message);
+      }
+    }
+  }
+
+  createKinosaalCard(saal) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -170,22 +202,38 @@ export class BetreiberView {
             <p>Reihen: ${saal.anzahlReihen}</p>
             <p>Sitze pro Reihe: ${saal.anzahlSitzeProReihe}</p>
             <p>Gesamtkapazität: ${saal.anzahlReihen * saal.anzahlSitzeProReihe}</p>
+            <button class="delete-btn" data-id="${saal._id}" data-name="${saal.name}">Löschen</button>
         `;
+
+    card.querySelector('.delete-btn').addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      const name = e.target.dataset.name;
+      this.deleteKinosaal(id, name);
+    });
+
     return card;
   }
 
-  createVorstellungCard (vorstellung) {
+  createVorstellungCard(vorstellung) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
             <h3>${vorstellung.filmName}</h3>
             <p>Datum: ${new Date(vorstellung.datumUhrzeit).toLocaleString()}</p>
-            <p>Kinosaal: ${vorstellung?.kinosaal?.name ?? 'Kein Kinosaal'}</p>
+            <p>Kinosaal: ${vorstellung.kinosaal?.name || 'Kein Kinosaal'}</p>
+            <button class="delete-btn" data-id="${vorstellung._id}" data-name="${vorstellung.filmName}">Löschen</button>
         `;
+
+    card.querySelector('.delete-btn').addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      const name = e.target.dataset.name;
+      this.deleteVorstellung(id, name);
+    });
+
     return card;
   }
 
-  createReservierungCard (reservierung) {
+  createReservierungCard(reservierung) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -193,11 +241,20 @@ export class BetreiberView {
             <p>Film: ${reservierung.vorstellung.filmName}</p>
             <p>Datum: ${new Date(reservierung.vorstellung.datumUhrzeit).toLocaleString()}</p>
             <p>Sitzplätze: ${reservierung.sitzplaetze.map(s => `Reihe ${s.reihe}, Platz ${s.sitz}`).join('; ')}</p>
-            <button class="show-qr-btn" data-id="${reservierung._id}">QR-Code anzeigen</button>
+            <div class="card-actions">
+                <button class="show-qr-btn" data-id="${reservierung._id}">QR-Code anzeigen</button>
+                <button class="delete-btn" data-id="${reservierung._id}" data-name="${reservierung.kundenName}">Löschen</button>
+            </div>
         `;
 
     card.querySelector('.show-qr-btn').addEventListener('click', () => {
       this.qrGenerator.generateAndShow(reservierung);
+    });
+
+    card.querySelector('.delete-btn').addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      const name = e.target.dataset.name;
+      this.deleteReservierung(id, name);
     });
 
     return card;

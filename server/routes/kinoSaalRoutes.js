@@ -1,5 +1,6 @@
 import express from 'express';
 import Kinosaal from '../models/Kinosaal.js';
+import Vorstellung from '../models/Vorstellung.js';
 
 const router = express.Router();
 
@@ -39,6 +40,27 @@ router.post('/', async (req, res) => {
     res.status(201).json(neuerKinosaal);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+});
+
+// Kinosaal löschen
+router.delete('/:id', async (req, res) => {
+  try {
+    // Prüfen, ob es Vorstellungen in diesem Kinosaal gibt
+    const vorstellungen = await Vorstellung.find({ kinosaal: req.params.id });
+    if (vorstellungen.length > 0) {
+      return res.status(400).json({
+        message: 'Kinosaal kann nicht gelöscht werden, da noch Vorstellungen existieren'
+      });
+    }
+
+    const kinosaal = await Kinosaal.findByIdAndDelete(req.params.id);
+    if (!kinosaal) {
+      return res.status(404).json({ message: 'Kinosaal nicht gefunden' });
+    }
+    res.json({ message: 'Kinosaal erfolgreich gelöscht' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

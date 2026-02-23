@@ -1,6 +1,7 @@
 import express from 'express';
 import Vorstellung from '../models/Vorstellung.js';
 import Kinosaal from '../models/Kinosaal.js';
+import Reservierung from '../models/Reservierung.js';
 
 const router = express.Router();
 
@@ -30,8 +31,6 @@ router.get('/:id', async (req, res) => {
 // Neue Vorstellung anlegen
 router.post('/', async (req, res) => {
   try {
-    // Prüfen, ob Kinosaal existiert
-    console.log('BODY:', req.body);
     const kinosaal = await Kinosaal.findById(req.body.kinosaalId);
     if (!kinosaal) {
       return res.status(404).json({ message: 'Kinosaal nicht gefunden' });
@@ -48,6 +47,27 @@ router.post('/', async (req, res) => {
     res.status(201).json(neueVorstellung);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+});
+
+// Vorstellung löschen
+router.delete('/:id', async (req, res) => {
+  try {
+    // Prüfen, ob es Reservierungen für diese Vorstellung gibt
+    const reservierungen = await Reservierung.find({ vorstellung: req.params.id });
+    if (reservierungen.length > 0) {
+      return res.status(400).json({
+        message: 'Vorstellung kann nicht gelöscht werden, da noch Reservierungen existieren'
+      });
+    }
+
+    const vorstellung = await Vorstellung.findByIdAndDelete(req.params.id);
+    if (!vorstellung) {
+      return res.status(404).json({ message: 'Vorstellung nicht gefunden' });
+    }
+    res.json({ message: 'Vorstellung erfolgreich gelöscht' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

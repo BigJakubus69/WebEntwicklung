@@ -50,34 +50,32 @@ router.get('/vorstellung/:vorstellungId', async (req, res) => {
 // Neue Reservierung anlegen
 router.post('/', async (req, res) => {
   try {
-    // Prüfen, ob Vorstellung existiert
     const vorstellung = await Vorstellung.findById(req.body.vorstellungId).populate('kinosaal');
     if (!vorstellung) {
       return res.status(404).json({ message: 'Vorstellung nicht gefunden' });
     }
 
-    // Prüfen, ob Sitzplätze gültig sind
     const kinosaal = vorstellung.kinosaal;
     const ungueltigePlaetze = req.body.sitzplaetze.filter(
-      sitz => sitz.reihe > kinosaal.anzahlReihen || sitz.sitz > kinosaal.anzahlSitzeProReihe
+        sitz => sitz.reihe > kinosaal.anzahlReihen || sitz.sitz > kinosaal.anzahlSitzeProReihe
     );
 
     if (ungueltigePlaetze.length > 0) {
       return res.status(400).json({ message: 'Ungültige Sitzplätze' });
     }
 
-    // Prüfen, ob Sitzplätze bereits reserviert sind
     const bestehendeReservierungen = await Reservierung.find({
       vorstellung: req.body.vorstellungId,
-      'sitzplaetze.reihe': { $in: req.body.sitzplaetze.map(s => s.reihe) },
-      'sitzplaetze.sitz': { $in: req.body.sitzplaetze.map(s => s.sitz) }
+      $or: req.body.sitzplaetze.map(sitz => ({
+        'sitzplaetze.reihe': sitz.reihe,
+        'sitzplaetze.sitz': sitz.sitz
+      }))
     });
 
     if (bestehendeReservierungen.length > 0) {
       return res.status(400).json({ message: 'Einige Sitzplätze sind bereits reserviert' });
     }
 
-    // QR-Code generieren
     const reservierungsDaten = {
       id: new mongoose.Types.ObjectId(),
       vorstellung: vorstellung._id,
@@ -105,6 +103,19 @@ router.post('/', async (req, res) => {
     res.status(201).json(neueReservierung);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+});
+
+// Reservierung löschen
+router.delete('/:id', async (req, res) => {
+  try {
+    const reservierung = await Reservierung.findByIdAndDelete(req.params.id);
+    if (!reservierung) {
+      return res.status(404).json({ message: 'Reservierung nicht gefunden' });
+    }
+    res.json({ message: 'Reservierung erfolgreich gelöscht' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

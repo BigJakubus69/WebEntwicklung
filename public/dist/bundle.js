@@ -43,6 +43,11 @@ var ApiClient = class {
       body: JSON.stringify(data)
     });
   }
+  async deleteKinosaal(id) {
+    return this.request("/kinosaele/".concat(id), {
+      method: "DELETE"
+    });
+  }
   // Vorstellungen
   async getVorstellungen() {
     return this.request("/vorstellungen");
@@ -51,6 +56,11 @@ var ApiClient = class {
     return this.request("/vorstellungen", {
       method: "POST",
       body: JSON.stringify(data)
+    });
+  }
+  async deleteVorstellung(id) {
+    return this.request("/vorstellungen/".concat(id), {
+      method: "DELETE"
     });
   }
   // Reservierungen
@@ -64,6 +74,11 @@ var ApiClient = class {
     return this.request("/reservierungen", {
       method: "POST",
       body: JSON.stringify(data)
+    });
+  }
+  async deleteReservierung(id) {
+    return this.request("/reservierungen/".concat(id), {
+      method: "DELETE"
     });
   }
 };
@@ -184,6 +199,9 @@ var QRCodeGenerator = class {
     modal.id = "qrModal";
     const modalContent = document.createElement("div");
     modalContent.className = "modal-content";
+    modalContent.style.maxHeight = "80vh";
+    modalContent.style.display = "flex";
+    modalContent.style.flexDirection = "column";
     const closeBtn = document.createElement("span");
     closeBtn.className = "close";
     closeBtn.innerHTML = "&times;";
@@ -192,22 +210,41 @@ var QRCodeGenerator = class {
     };
     const title = document.createElement("h2");
     title.textContent = "Ihr QR-Code";
+    title.style.marginTop = "0";
     const qrDiv = document.createElement("div");
     qrDiv.className = "qr-code";
+    qrDiv.style.textAlign = "center";
+    qrDiv.style.margin = "1rem 0";
     const qrImg = document.createElement("img");
     qrImg.src = reservierung.qrCode;
     qrImg.alt = "QR-Code f\xFCr Reservierung";
+    qrImg.style.maxWidth = "200px";
+    qrImg.style.width = "100%";
+    qrImg.style.height = "auto";
+    const infoContainer = document.createElement("div");
+    infoContainer.style.overflowY = "auto";
+    infoContainer.style.maxHeight = "300px";
+    infoContainer.style.padding = "0.5rem";
+    infoContainer.style.margin = "1rem 0";
+    infoContainer.style.border = "1px solid #e0e0e0";
+    infoContainer.style.borderRadius = "8px";
+    infoContainer.style.backgroundColor = "#f8f9fa";
     const info = document.createElement("div");
     info.className = "reservierungs-info";
-    info.innerHTML = "\n            <p><strong>Film:</strong> ".concat(reservierung.vorstellung.filmName, "</p>\n            <p><strong>Datum:</strong> ").concat(new Date(reservierung.vorstellung.datumUhrzeit).toLocaleString(), "</p>\n            <p><strong>Sitzpl\xE4tze:</strong> ").concat(reservierung.sitzplaetze.map((s) => "Reihe ".concat(s.reihe, ", Platz ").concat(s.sitz)).join("; "), "</p>\n            <p><strong>Name:</strong> ").concat(reservierung.kundenName, "</p>\n        ");
+    info.style.margin = "0";
+    info.style.padding = "0.5rem";
+    info.innerHTML = "\n      <p><strong>Film:</strong> ".concat(reservierung.vorstellung.filmName, "</p>\n      <p><strong>Datum:</strong> ").concat(new Date(reservierung.vorstellung.datumUhrzeit).toLocaleString(), '</p>\n      <p><strong>Sitzpl\xE4tze:</strong></p>\n      <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 0.5rem; border-radius: 4px; background: white;">\n        ').concat(reservierung.sitzplaetze.map((s) => "Reihe ".concat(s.reihe, ", Platz ").concat(s.sitz)).join("<br>"), '\n      </div>\n      <p style="margin-top: 0.5rem;"><strong>Name:</strong> ').concat(reservierung.kundenName, "</p>\n    ");
+    infoContainer.appendChild(info);
     const printBtn = document.createElement("button");
     printBtn.textContent = "QR-Code drucken";
+    printBtn.style.marginTop = "1rem";
+    printBtn.style.width = "100%";
     printBtn.onclick = () => this.printQRCode(reservierung);
     qrDiv.appendChild(qrImg);
     modalContent.appendChild(closeBtn);
     modalContent.appendChild(title);
     modalContent.appendChild(qrDiv);
-    modalContent.appendChild(info);
+    modalContent.appendChild(infoContainer);
     modalContent.appendChild(printBtn);
     modal.appendChild(modalContent);
     this.container.appendChild(modal);
@@ -220,8 +257,13 @@ var QRCodeGenerator = class {
   }
   printQRCode(reservierung) {
     const printWindow = window.open("", "_blank");
-    printWindow.document.write('\n            <html>\n                <head>\n                    <title>QR-Code Reservierung</title>\n                    <style>\n                        body { text-align: center; padding: 20px; }\n                        img { max-width: 300px; }\n                    </style>\n                </head>\n                <body>\n                    <h1>Reservierungsbest\xE4tigung</h1>\n                    <img src="'.concat(reservierung.qrCode, '" alt="QR-Code">\n                    <p><strong>Film:</strong> ').concat(reservierung.vorstellung.filmName, "</p>\n                    <p><strong>Datum:</strong> ").concat(new Date(reservierung.vorstellung.datumUhrzeit).toLocaleString(), "</p>\n                    <p><strong>Sitzpl\xE4tze:</strong> ").concat(reservierung.sitzplaetze.map((s) => "Reihe ".concat(s.reihe, ", Platz ").concat(s.sitz)).join("; "), "</p>\n                    <p><strong>Name:</strong> ").concat(reservierung.kundenName, "</p>\n                </body>\n            </html>\n        "));
-    printWindow.print();
+    const sitzplatzListe = reservierung.sitzplaetze.map((s) => "Reihe ".concat(s.reihe, ", Platz ").concat(s.sitz)).join("<br>");
+    printWindow.document.write('\n      <!DOCTYPE html>\n      <html>\n        <head>\n          <title>QR-Code Reservierung</title>\n          <style>\n            body { \n              font-family: Arial, sans-serif; \n              text-align: center; \n              padding: 20px; \n              margin: 0;\n            }\n            .container {\n              max-width: 600px;\n              margin: 0 auto;\n            }\n            img { \n              max-width: 250px; \n              width: 100%;\n              height: auto;\n              margin: 20px 0;\n            }\n            .info {\n              text-align: left;\n              background: #f5f5f5;\n              padding: 15px;\n              border-radius: 8px;\n              margin: 20px 0;\n            }\n            .sitzliste {\n              max-height: none;\n              overflow: visible;\n              background: white;\n              padding: 10px;\n              border: 1px solid #ddd;\n              border-radius: 4px;\n            }\n            h1 {\n              color: #333;\n              margin-bottom: 20px;\n            }\n            @media print {\n              body { padding: 0; }\n              .no-print { display: none; }\n            }\n          </style>\n        </head>\n        <body>\n          <div class="container">\n            <h1>Reservierungsbest\xE4tigung</h1>\n            \n            <img src="'.concat(reservierung.qrCode, '" alt="QR-Code">\n            \n            <div class="info">\n              <p><strong>Film:</strong> ').concat(reservierung.vorstellung.filmName, "</p>\n              <p><strong>Datum:</strong> ").concat(new Date(reservierung.vorstellung.datumUhrzeit).toLocaleString(), "</p>\n              <p><strong>Name:</strong> ").concat(reservierung.kundenName, '</p>\n              <p><strong>Sitzpl\xE4tze:</strong></p>\n              <div class="sitzliste">\n                ').concat(sitzplatzListe, '\n              </div>\n            </div>\n            \n            <p class="no-print">Bitte bewahren Sie diese Best\xE4tigung f\xFCr den Eintritt auf.</p>\n          </div>\n        </body>\n      </html>\n    '));
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
   }
 };
 
@@ -306,25 +348,74 @@ var BetreiberView = class {
       alert("Fehler beim Anlegen der Vorstellung: " + error.message);
     }
   }
+  // Löschfunktionen
+  async deleteKinosaal(id, name) {
+    if (confirm('Sind Sie sicher, dass Sie den Kinosaal "'.concat(name, '" l\xF6schen m\xF6chten?'))) {
+      try {
+        await this.apiClient.deleteKinosaal(id);
+        alert("Kinosaal erfolgreich gel\xF6scht!");
+        this.loadData();
+      } catch (error) {
+        alert("Fehler beim L\xF6schen des Kinosaals: " + error.message);
+      }
+    }
+  }
+  async deleteVorstellung(id, filmName) {
+    if (confirm('Sind Sie sicher, dass Sie die Vorstellung "'.concat(filmName, '" l\xF6schen m\xF6chten?'))) {
+      try {
+        await this.apiClient.deleteVorstellung(id);
+        alert("Vorstellung erfolgreich gel\xF6scht!");
+        this.loadData();
+      } catch (error) {
+        alert("Fehler beim L\xF6schen der Vorstellung: " + error.message);
+      }
+    }
+  }
+  async deleteReservierung(id, kundenName) {
+    if (confirm('Sind Sie sicher, dass Sie die Reservierung von "'.concat(kundenName, '" l\xF6schen m\xF6chten?'))) {
+      try {
+        await this.apiClient.deleteReservierung(id);
+        alert("Reservierung erfolgreich gel\xF6scht!");
+        this.loadData();
+      } catch (error) {
+        alert("Fehler beim L\xF6schen der Reservierung: " + error.message);
+      }
+    }
+  }
   createKinosaalCard(saal) {
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = "\n            <h3>".concat(saal.name, "</h3>\n            <p>Reihen: ").concat(saal.anzahlReihen, "</p>\n            <p>Sitze pro Reihe: ").concat(saal.anzahlSitzeProReihe, "</p>\n            <p>Gesamtkapazit\xE4t: ").concat(saal.anzahlReihen * saal.anzahlSitzeProReihe, "</p>\n        ");
+    card.innerHTML = "\n            <h3>".concat(saal.name, "</h3>\n            <p>Reihen: ").concat(saal.anzahlReihen, "</p>\n            <p>Sitze pro Reihe: ").concat(saal.anzahlSitzeProReihe, "</p>\n            <p>Gesamtkapazit\xE4t: ").concat(saal.anzahlReihen * saal.anzahlSitzeProReihe, '</p>\n            <button class="delete-btn" data-id="').concat(saal._id, '" data-name="').concat(saal.name, '">L\xF6schen</button>\n        ');
+    card.querySelector(".delete-btn").addEventListener("click", (e) => {
+      const id = e.target.dataset.id;
+      const name = e.target.dataset.name;
+      this.deleteKinosaal(id, name);
+    });
     return card;
   }
   createVorstellungCard(vorstellung) {
-    var _a, _b;
+    var _a;
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = "\n            <h3>".concat(vorstellung.filmName, "</h3>\n            <p>Datum: ").concat(new Date(vorstellung.datumUhrzeit).toLocaleString(), "</p>\n            <p>Kinosaal: ").concat((_b = (_a = vorstellung == null ? void 0 : vorstellung.kinosaal) == null ? void 0 : _a.name) != null ? _b : "Kein Kinosaal", "</p>\n        ");
+    card.innerHTML = "\n            <h3>".concat(vorstellung.filmName, "</h3>\n            <p>Datum: ").concat(new Date(vorstellung.datumUhrzeit).toLocaleString(), "</p>\n            <p>Kinosaal: ").concat(((_a = vorstellung.kinosaal) == null ? void 0 : _a.name) || "Kein Kinosaal", '</p>\n            <button class="delete-btn" data-id="').concat(vorstellung._id, '" data-name="').concat(vorstellung.filmName, '">L\xF6schen</button>\n        ');
+    card.querySelector(".delete-btn").addEventListener("click", (e) => {
+      const id = e.target.dataset.id;
+      const name = e.target.dataset.name;
+      this.deleteVorstellung(id, name);
+    });
     return card;
   }
   createReservierungCard(reservierung) {
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = "\n            <h3>Reservierung f\xFCr ".concat(reservierung.kundenName, "</h3>\n            <p>Film: ").concat(reservierung.vorstellung.filmName, "</p>\n            <p>Datum: ").concat(new Date(reservierung.vorstellung.datumUhrzeit).toLocaleString(), "</p>\n            <p>Sitzpl\xE4tze: ").concat(reservierung.sitzplaetze.map((s) => "Reihe ".concat(s.reihe, ", Platz ").concat(s.sitz)).join("; "), '</p>\n            <button class="show-qr-btn" data-id="').concat(reservierung._id, '">QR-Code anzeigen</button>\n        ');
+    card.innerHTML = "\n            <h3>Reservierung f\xFCr ".concat(reservierung.kundenName, "</h3>\n            <p>Film: ").concat(reservierung.vorstellung.filmName, "</p>\n            <p>Datum: ").concat(new Date(reservierung.vorstellung.datumUhrzeit).toLocaleString(), "</p>\n            <p>Sitzpl\xE4tze: ").concat(reservierung.sitzplaetze.map((s) => "Reihe ".concat(s.reihe, ", Platz ").concat(s.sitz)).join("; "), '</p>\n            <div class="card-actions">\n                <button class="show-qr-btn" data-id="').concat(reservierung._id, '">QR-Code anzeigen</button>\n                <button class="delete-btn" data-id="').concat(reservierung._id, '" data-name="').concat(reservierung.kundenName, '">L\xF6schen</button>\n            </div>\n        ');
     card.querySelector(".show-qr-btn").addEventListener("click", () => {
       this.qrGenerator.generateAndShow(reservierung);
+    });
+    card.querySelector(".delete-btn").addEventListener("click", (e) => {
+      const id = e.target.dataset.id;
+      const name = e.target.dataset.name;
+      this.deleteReservierung(id, name);
     });
     return card;
   }

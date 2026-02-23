@@ -1,11 +1,9 @@
-/* global fetch */
-
 export class ApiClient {
-  constructor (baseURL = '/api') {
+  constructor(baseURL = '/api') {
     this.baseURL = baseURL;
   }
 
-  async request (endpoint, options = {}) {
+  async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
     const response = await fetch(url, {
       headers: {
@@ -24,42 +22,60 @@ export class ApiClient {
   }
 
   // Kinosäle
-  async getKinosaele () {
+  async getKinosaele() {
     return this.request('/kinosaele');
   }
 
-  async createKinosaal (data) {
+  async createKinosaal(data) {
     return this.request('/kinosaele', {
       method: 'POST',
       body: JSON.stringify(data)
     });
   }
 
+  async deleteKinosaal(id) {
+    return this.request(`/kinosaele/${id}`, {
+      method: 'DELETE'
+    });
+  }
+
   // Vorstellungen
-  async getVorstellungen () {
+  async getVorstellungen() {
     return this.request('/vorstellungen');
   }
 
-  async createVorstellung (data) {
+  async createVorstellung(data) {
     return this.request('/vorstellungen', {
       method: 'POST',
       body: JSON.stringify(data)
     });
   }
 
+  async deleteVorstellung(id) {
+    return this.request(`/vorstellungen/${id}`, {
+      method: 'DELETE'
+    });
+  }
+
   // Reservierungen
-  async getReservierungen () {
+  async getReservierungen() {
     return this.request('/reservierungen');
   }
 
-  async getReservierungenFuerVorstellung (vorstellungId) {
+  async getReservierungenFuerVorstellung(vorstellungId) {
     return this.request(`/reservierungen/vorstellung/${vorstellungId}`);
   }
 
-  async createReservierung (data) {
+  async createReservierung(data) {
     return this.request('/reservierungen', {
       method: 'POST',
       body: JSON.stringify(data)
+    });
+  }
+
+  async deleteReservierung(id) {
+    return this.request(`/reservierungen/${id}`, {
+      method: 'DELETE'
     });
   }
 }
