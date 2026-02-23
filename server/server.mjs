@@ -28,18 +28,18 @@ app.use('/api/reservierungen', reservierungRoutes);
 
 // MongoDB Verbindung
 mongoose.connect(MONGODB_URI)
-    .then(() => {
-      console.log('MongoDB verbunden');
+  .then(() => {
+    console.log('MongoDB verbunden');
 
-      // Server starten
-      app.listen(PORT, () => {
-        console.log(`Server läuft auf Port ${PORT}`);
-      });
-    })
-    .catch(err => {
-      console.error('MongoDB Verbindungsfehler:', err);
-      process.exit(1);
+    // Server starten
+    app.listen(PORT, () => {
+      console.log(`Server läuft auf Port ${PORT}`);
     });
+  })
+  .catch(err => {
+    console.error('MongoDB Verbindungsfehler:', err);
+    process.exit(1);
+  });
 
 // 404 Handler
 app.use((req, res) => {

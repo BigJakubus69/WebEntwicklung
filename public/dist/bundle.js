@@ -187,7 +187,9 @@ var QRCodeGenerator = class {
     const closeBtn = document.createElement("span");
     closeBtn.className = "close";
     closeBtn.innerHTML = "&times;";
-    closeBtn.onclick = () => modal.style.display = "none";
+    closeBtn.onclick = () => {
+      modal.style.display = "none";
+    };
     const title = document.createElement("h2");
     title.textContent = "Ihr QR-Code";
     const qrDiv = document.createElement("div");
@@ -496,6 +498,6 @@ var App = class {
   }
 };
 document.addEventListener("DOMContentLoaded", () => {
-  new App();
+  window.app = new App();
 });
 //# sourceMappingURL=bundle.js.map

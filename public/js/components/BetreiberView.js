@@ -1,19 +1,21 @@
+/* global alert */
+
 import { PaginatedList } from './Pagination.js';
 import { QRCodeGenerator } from './QRCodeGenerator.js';
 
 export class BetreiberView {
-    constructor(apiClient) {
-        this.apiClient = apiClient;
-        // Instanzen werden erst nach dem Rendern erstellt
-        this.kinosaeleList = null;
-        this.vorstellungenList = null;
-        this.reservierungenList = null;
-        this.qrGenerator = null;
-    }
+  constructor (apiClient) {
+    this.apiClient = apiClient;
+    // Instanzen werden erst nach dem Rendern erstellt
+    this.kinosaeleList = null;
+    this.vorstellungenList = null;
+    this.reservierungenList = null;
+    this.qrGenerator = null;
+  }
 
-    render() {
-        const app = document.getElementById('app');
-        app.innerHTML = `
+  render () {
+    const app = document.getElementById('app');
+    app.innerHTML = `
             <div class="container">
                 <h2>Betreiber-Dashboard</h2>
                 
@@ -75,118 +77,118 @@ export class BetreiberView {
             <div id="qr-container"></div>
         `;
 
-        // Jetzt existieren die Container im DOM - hier werden die Instanzen erstellt
-        this.kinosaeleList = new PaginatedList('kinosaele-list', (saal) => this.createKinosaalCard(saal));
-        this.vorstellungenList = new PaginatedList('vorstellungen-list', (vorstellung) => this.createVorstellungCard(vorstellung));
-        this.reservierungenList = new PaginatedList('reservierungen-list', (reservierung) => this.createReservierungCard(reservierung));
-        this.qrGenerator = new QRCodeGenerator('qr-container');
+    // Jetzt existieren die Container im DOM - hier werden die Instanzen erstellt
+    this.kinosaeleList = new PaginatedList('kinosaele-list', (saal) => this.createKinosaalCard(saal));
+    this.vorstellungenList = new PaginatedList('vorstellungen-list', (vorstellung) => this.createVorstellungCard(vorstellung));
+    this.reservierungenList = new PaginatedList('reservierungen-list', (reservierung) => this.createReservierungCard(reservierung));
+    this.qrGenerator = new QRCodeGenerator('qr-container');
 
-        this.initEventListeners();
-        this.loadData();
-    }
+    this.initEventListeners();
+    this.loadData();
+  }
 
-    initEventListeners() {
-        document.getElementById('kinosaal-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.createKinosaal();
-        });
+  initEventListeners () {
+    document.getElementById('kinosaal-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await this.createKinosaal();
+    });
 
-        document.getElementById('vorstellung-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.createVorstellung();
-        });
-    }
+    document.getElementById('vorstellung-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await this.createVorstellung();
+    });
+  }
 
-    async loadData() {
-        try {
-            const [kinosaele, vorstellungen, reservierungen] = await Promise.all([
-                this.apiClient.getKinosaele(),
-                this.apiClient.getVorstellungen(),
-                this.apiClient.getReservierungen()
-            ]);
+  async loadData () {
+    try {
+      const [kinosaele, vorstellungen, reservierungen] = await Promise.all([
+        this.apiClient.getKinosaele(),
+        this.apiClient.getVorstellungen(),
+        this.apiClient.getReservierungen()
+      ]);
 
-            this.kinosaeleList.setItems(kinosaele);
-            this.vorstellungenList.setItems(vorstellungen);
-            this.reservierungenList.setItems(reservierungen);
+      this.kinosaeleList.setItems(kinosaele);
+      this.vorstellungenList.setItems(vorstellungen);
+      this.reservierungenList.setItems(reservierungen);
 
-            // Kinosaal-SELECT für Vorstellungsformular füllen
-            const select = document.getElementById('kinosaal-select');
-            select.innerHTML = '<option value="">Bitte wählen...</option>' +
+      // Kinosaal-SELECT für Vorstellungsformular füllen
+      const select = document.getElementById('kinosaal-select');
+      select.innerHTML = '<option value="">Bitte wählen...</option>' +
                 kinosaele.map(saal =>
                     `<option value="${saal._id}">${saal.name}</option>`
                 ).join('');
-        } catch (error) {
-            alert('Fehler beim Laden der Daten: ' + error.message);
-        }
+    } catch (error) {
+      alert('Fehler beim Laden der Daten: ' + error.message);
     }
+  }
 
-    async createKinosaal() {
-        try {
-            const name = document.getElementById('saal-name').value;
-            const anzahlReihen = parseInt(document.getElementById('reihen-anzahl').value);
-            const anzahlSitzeProReihe = parseInt(document.getElementById('sitze-pro-reihe').value);
+  async createKinosaal () {
+    try {
+      const name = document.getElementById('saal-name').value;
+      const anzahlReihen = parseInt(document.getElementById('reihen-anzahl').value);
+      const anzahlSitzeProReihe = parseInt(document.getElementById('sitze-pro-reihe').value);
 
-            await this.apiClient.createKinosaal({
-                name,
-                anzahlReihen,
-                anzahlSitzeProReihe
-            });
+      await this.apiClient.createKinosaal({
+        name,
+        anzahlReihen,
+        anzahlSitzeProReihe
+      });
 
-            alert('Kinosaal erfolgreich angelegt!');
-            document.getElementById('kinosaal-form').reset();
-            this.loadData();
-        } catch (error) {
-            alert('Fehler beim Anlegen des Kinosaals: ' + error.message);
-        }
+      alert('Kinosaal erfolgreich angelegt!');
+      document.getElementById('kinosaal-form').reset();
+      this.loadData();
+    } catch (error) {
+      alert('Fehler beim Anlegen des Kinosaals: ' + error.message);
     }
+  }
 
-    async createVorstellung() {
-        try {
-            const filmName = document.getElementById('film-name').value;
-            const datumUhrzeit = document.getElementById('vorstellung-datum').value;
-            const kinosaalId = document.getElementById('kinosaal-select').value;
+  async createVorstellung () {
+    try {
+      const filmName = document.getElementById('film-name').value;
+      const datumUhrzeit = document.getElementById('vorstellung-datum').value;
+      const kinosaalId = document.getElementById('kinosaal-select').value;
 
-            await this.apiClient.createVorstellung({
-                filmName,
-                datumUhrzeit,
-                kinosaalId
-            });
+      await this.apiClient.createVorstellung({
+        filmName,
+        datumUhrzeit,
+        kinosaalId
+      });
 
-            alert('Vorstellung erfolgreich angelegt!');
-            document.getElementById('vorstellung-form').reset();
-            this.loadData();
-        } catch (error) {
-            alert('Fehler beim Anlegen der Vorstellung: ' + error.message);
-        }
+      alert('Vorstellung erfolgreich angelegt!');
+      document.getElementById('vorstellung-form').reset();
+      this.loadData();
+    } catch (error) {
+      alert('Fehler beim Anlegen der Vorstellung: ' + error.message);
     }
+  }
 
-    createKinosaalCard(saal) {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
+  createKinosaalCard (saal) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
             <h3>${saal.name}</h3>
             <p>Reihen: ${saal.anzahlReihen}</p>
             <p>Sitze pro Reihe: ${saal.anzahlSitzeProReihe}</p>
             <p>Gesamtkapazität: ${saal.anzahlReihen * saal.anzahlSitzeProReihe}</p>
         `;
-        return card;
-    }
+    return card;
+  }
 
-    createVorstellungCard(vorstellung) {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
+  createVorstellungCard (vorstellung) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
             <h3>${vorstellung.filmName}</h3>
             <p>Datum: ${new Date(vorstellung.datumUhrzeit).toLocaleString()}</p>
             <p>Kinosaal: ${vorstellung.kinosaal.name}</p>
         `;
-        return card;
-    }
+    return card;
+  }
 
-    createReservierungCard(reservierung) {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
+  createReservierungCard (reservierung) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
             <h3>Reservierung für ${reservierung.kundenName}</h3>
             <p>Film: ${reservierung.vorstellung.filmName}</p>
             <p>Datum: ${new Date(reservierung.vorstellung.datumUhrzeit).toLocaleString()}</p>
@@ -194,10 +196,10 @@ export class BetreiberView {
             <button class="show-qr-btn" data-id="${reservierung._id}">QR-Code anzeigen</button>
         `;
 
-        card.querySelector('.show-qr-btn').addEventListener('click', () => {
-            this.qrGenerator.generateAndShow(reservierung);
-        });
+    card.querySelector('.show-qr-btn').addEventListener('click', () => {
+      this.qrGenerator.generateAndShow(reservierung);
+    });
 
-        return card;
-    }
+    return card;
+  }
 }
