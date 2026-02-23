@@ -313,9 +313,10 @@ var BetreiberView = class {
     return card;
   }
   createVorstellungCard(vorstellung) {
+    var _a, _b;
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = "\n            <h3>".concat(vorstellung.filmName, "</h3>\n            <p>Datum: ").concat(new Date(vorstellung.datumUhrzeit).toLocaleString(), "</p>\n            <p>Kinosaal: ").concat(vorstellung.kinosaal.name, "</p>\n        ");
+    card.innerHTML = "\n            <h3>".concat(vorstellung.filmName, "</h3>\n            <p>Datum: ").concat(new Date(vorstellung.datumUhrzeit).toLocaleString(), "</p>\n            <p>Kinosaal: ").concat((_b = (_a = vorstellung == null ? void 0 : vorstellung.kinosaal) == null ? void 0 : _a.name) != null ? _b : "Kein Kinosaal", "</p>\n        ");
     return card;
   }
   createReservierungCard(reservierung) {
@@ -365,9 +366,10 @@ var KundeView = class {
     }
   }
   createVorstellungCard(vorstellung) {
+    var _a, _b;
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = "\n            <h3>".concat(vorstellung.filmName, "</h3>\n            <p>Datum: ").concat(new Date(vorstellung.datumUhrzeit).toLocaleString(), "</p>\n            <p>Kinosaal: ").concat(vorstellung.kinosaal.name, '</p>\n            <button class="select-show-btn" data-id="').concat(vorstellung._id, '">Sitzpl\xE4tze ausw\xE4hlen</button>\n        ');
+    card.innerHTML = "\n            <h3>".concat(vorstellung.filmName, "</h3>\n            <p>Datum: ").concat(new Date(vorstellung.datumUhrzeit).toLocaleString(), "</p>\n            <p>Kinosaal: ").concat((_b = (_a = vorstellung == null ? void 0 : vorstellung.kinosaal) == null ? void 0 : _a.name) != null ? _b : "Kein Kinosaal", '</p>\n            <button class="select-show-btn" data-id="').concat(vorstellung._id, '">Sitzpl\xE4tze ausw\xE4hlen</button>\n        ');
     card.querySelector(".select-show-btn").addEventListener("click", () => {
       this.showSitzplatzAuswahl(vorstellung);
     });

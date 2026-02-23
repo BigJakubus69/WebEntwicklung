@@ -31,7 +31,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     // Prüfen, ob Kinosaal existiert
-    console.log("BODY:", req.body);
+    console.log('BODY:', req.body);
     const kinosaal = await Kinosaal.findById(req.body.kinosaalId);
     if (!kinosaal) {
       return res.status(404).json({ message: 'Kinosaal nicht gefunden' });
@@ -52,4 +52,3 @@ router.post('/', async (req, res) => {
 });
 
 export default router;
-

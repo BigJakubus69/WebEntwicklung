@@ -74,7 +74,7 @@ export class KundeView {
     card.innerHTML = `
             <h3>${vorstellung.filmName}</h3>
             <p>Datum: ${new Date(vorstellung.datumUhrzeit).toLocaleString()}</p>
-            <p>Kinosaal: ${vorstellung.kinosaal.name}</p>
+            <p>Kinosaal: ${vorstellung?.kinosaal?.name ?? 'Kein Kinosaal'}</p>
             <button class="select-show-btn" data-id="${vorstellung._id}">Sitzplätze auswählen</button>
         `;
 
