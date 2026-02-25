@@ -19,7 +19,7 @@ export class PaginationHelper {
     const windowHeight = window.innerHeight;
     const headerHeight = document.querySelector('header')?.offsetHeight || 0;
     const paginationHeight = 100; // Geschätzte Höhe der Paginierung
-    const itemHeight = 100; // Geschätzte Höhe pro Eintrag
+    const itemHeight = 30; // Geschätzte Höhe pro Eintrag
 
     const availableHeight = windowHeight - headerHeight - paginationHeight - 100;
     this.itemsPerPage = Math.max(1, Math.floor(availableHeight / itemHeight));
